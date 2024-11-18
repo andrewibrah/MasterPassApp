@@ -1,61 +1,91 @@
-//
-//  ContentView.swift
-//  MasterPass
-//
-//  Created by Andrew Ibrahem on 10/16/24.
-//
-
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @AppStorage("isLoggedIn") var isLoggedIn: Bool = false
+    @State private var showCreatePassword = false
+    @State private var showSavedPasswords = false
+    @State private var showPasscodeManager = false
+    
+    @State private var savedPasswords: [PasswordEntry] = []
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        VStack(spacing: 20) {
+            Text("Welcome to MasterPass")
+                .font(.largeTitle)
+                .padding()
+
+            // Button to Create Password
+            Button(action: {
+                showCreatePassword.toggle()
+            }) {
+                Text("Create Password")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
-                }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+            .sheet(isPresented: $showCreatePassword) {
+                PasswordFormView(savedPasswords: $savedPasswords)
             }
-        } detail: {
-            Text("Select an item")
+
+            // Button to View Saved Passwords
+            Button(action: {
+                showSavedPasswords.toggle()
+            }) {
+                Text("Saved Passwords")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+            }
+            .sheet(isPresented: $showSavedPasswords) {
+                PasswordListView(savedPasswords: $savedPasswords)
+            }
+
+            // Button to Manage Passcode
+            Button(action: {
+                showPasscodeManager.toggle()
+            }) {
+                Text("Create/Edit Passcode")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.orange)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+            }
+            .sheet(isPresented: $showPasscodeManager) {
+                PasscodeSettingsView()
+            }
+
+            Spacer()
+
+            // Log Out Button
+            Button(action: logOut) {
+                Text("Log Out")
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.red)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+                    .padding(.horizontal)
+            }
+        }
+        .padding()
+        .onAppear(perform: loadPasswords)
+    }
+    
+    private func loadPasswords() {
+        PasswordManager.loadPasswords { loadedPasswords in
+            savedPasswords = loadedPasswords
         }
     }
-
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
+    
+    private func logOut() {
+        isLoggedIn = false
     }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
-}
-
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
 }
