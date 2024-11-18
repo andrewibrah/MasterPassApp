@@ -1,61 +1,129 @@
-//
-//  ContentView.swift
-//  MasterPass
-//
-//  Created by Andrew Ibrahem on 10/16/24.
-//
+// ContentView.swift
+// Handles the main user interface and navigation between the main content and login view.
 
 import SwiftUI
-import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
+    @AppStorage("loggedInUsername") private var loggedInUsername: String = ""
+    @State private var showCreatePassword = false
+    @State private var showSavedPasswords = false
+    @State private var showPasscodeManager = false
+    @State private var savedPasswords: [PasswordEntry] = []
 
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
-                    }
-                }
-                .onDelete(perform: deleteItems)
+        VStack {
+            if isLoggedIn {
+                mainView
+            } else {
+                LoginView()
             }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+        }
+        .onAppear(perform: loadPasswords)
+    }
+
+    // MARK: - Main View for Logged-in Users
+
+    private var mainView: some View {
+        ZStack {
+            // Red background
+            Color.red.ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                // Colorful Text Logo
+                Text("MasterPass")
+                    .font(.largeTitle)
+                    .bold()
+                    .foregroundStyle(
+                        LinearGradient(
+                            colors: [.white, .yellow, .blue, .green],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .padding(.top, 50)
+
+                // Create Password Button
+                Button(action: {
+                    showCreatePassword.toggle()
+                }) {
+                    Text("Create Password")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.black)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
+                .sheet(isPresented: $showCreatePassword) {
+                    PasswordFormView(savedPasswords: $savedPasswords)
+                        .onDisappear {
+                            PasswordManager.savePasswords(savedPasswords, for: loggedInUsername)
+                        }
+                }
+
+                // Saved Passwords Button
+                Button(action: {
+                    showSavedPasswords.toggle()
+                }) {
+                    Text("Saved Passwords")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.black)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                }
+                .sheet(isPresented: $showSavedPasswords) {
+                    PasswordListView(savedPasswords: $savedPasswords)
+                }
+
+                // Passcode Manager Button
+                Button(action: {
+                    showPasscodeManager.toggle()
+                }) {
+                    Text("Create/Edit Passcode")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.black)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                }
+                .sheet(isPresented: $showPasscodeManager) {
+                    PasscodeSettingsView()
+                }
+
+                // Log Out Button
+                Button(action: logOut) {
+                    Text("Log Out")
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.red)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                        .padding(.horizontal)
                 }
             }
-        } detail: {
-            Text("Select an item")
         }
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
+    // MARK: - Functions
 
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
+    private func loadPasswords() {
+        if isLoggedIn {
+            PasswordManager.loadPasswords(for: loggedInUsername) { loadedPasswords in
+                savedPasswords = loadedPasswords
             }
+        } else {
+            savedPasswords = []
         }
     }
-}
 
-#Preview {
-    ContentView()
-        .modelContainer(for: Item.self, inMemory: true)
+    private func logOut() {
+        // Clear user data and reset login state
+        loggedInUsername = ""
+        isLoggedIn = false
+        savedPasswords.removeAll()
+    }
 }
