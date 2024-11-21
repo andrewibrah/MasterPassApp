@@ -64,4 +64,4 @@ MasterPass is ideal for users who prioritize simplicity, security, and functiona
 
 1. **Clone the Repository**:
    ```bash
-   git clone https://github.com/your-username/MasterPass.git
+   git clone https://github.com/andrewibrah/MasterPass.git
