@@ -1,6 +1,3 @@
-// Provides a reusable prompt for passcode entry.
-// Includes validation and callbacks for unlocking or canceling.
-
 import SwiftUI
 
 struct PasscodePromptView: View {

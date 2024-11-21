@@ -1,5 +1,5 @@
 // ContentView.swift
-// Handles the main user interface and navigation between the main content and login view.
+// Handles the main user interface and navigation between main content and login view.
 
 import SwiftUI
 
@@ -12,7 +12,7 @@ struct ContentView: View {
     @State private var savedPasswords: [PasswordEntry] = []
 
     var body: some View {
-        VStack {
+        Group {
             if isLoggedIn {
                 mainView
             } else {
@@ -78,21 +78,7 @@ struct ContentView: View {
                     PasswordListView(savedPasswords: $savedPasswords)
                 }
 
-                // Passcode Manager Button
-                Button(action: {
-                    showPasscodeManager.toggle()
-                }) {
-                    Text("Create/Edit Passcode")
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.black)
-                        .foregroundColor(.white)
-                        .cornerRadius(10)
-                        .padding(.horizontal)
-                }
-                .sheet(isPresented: $showPasscodeManager) {
-                    PasscodeSettingsView()
-                }
+             
 
                 // Log Out Button
                 Button(action: logOut) {
@@ -111,12 +97,8 @@ struct ContentView: View {
     // MARK: - Functions
 
     private func loadPasswords() {
-        if isLoggedIn {
-            PasswordManager.loadPasswords(for: loggedInUsername) { loadedPasswords in
-                savedPasswords = loadedPasswords
-            }
-        } else {
-            savedPasswords = []
+        PasswordManager.loadPasswords(for: loggedInUsername) { loadedPasswords in
+            savedPasswords = loadedPasswords
         }
     }
 

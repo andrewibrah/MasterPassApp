@@ -1,6 +1,3 @@
-// PasswordDetailView for displaying detailed information about a password.
-// Includes password unlocking within the detail view and a functional close button.
-
 import SwiftUI
 import LocalAuthentication
 
@@ -21,27 +18,9 @@ struct PasswordDetailView: View {
 
             Form {
                 Section(header: Text("Details")) {
-                    HStack {
-                        Text("Website:")
-                        Spacer()
-                        Text(password.website)
-                            .foregroundColor(.gray)
-                    }
-
-                    HStack {
-                        Text("Username:")
-                        Spacer()
-                        Text(password.username)
-                            .foregroundColor(.gray)
-                    }
-
-                    HStack {
-                        Text("Email:")
-                        Spacer()
-                        Text(password.email)
-                            .foregroundColor(.gray)
-                    }
-
+                    TextRow(label: "Website:", value: password.website)
+                    TextRow(label: "Username:", value: password.username)
+                    TextRow(label: "Email:", value: password.email)
                     HStack {
                         Text("Password:")
                         Spacer()
@@ -110,13 +89,31 @@ struct PasswordDetailView: View {
                 }
             }
         } else {
-            // Fallback to passcode if biometrics are unavailable
-            showPasscodePrompt = true
+            showPasscodePrompt = true // Fallback to passcode
         }
     }
 
     private func togglePasswordVisibility() {
         password.passwordHidden.toggle()
-        showPasscodePrompt = false
+        PasswordManager.savePasswords([password], for: "") // Update the password visibility
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 10) {
+            password.passwordHidden = true
+            PasswordManager.savePasswords([password], for: "") // Auto-hide after timeout
+        }
+    }
+
+    private struct TextRow: View {
+        let label: String
+        let value: String
+
+        var body: some View {
+            HStack {
+                Text(label)
+                Spacer()
+                Text(value)
+                    .foregroundColor(.gray)
+            }
+        }
     }
 }

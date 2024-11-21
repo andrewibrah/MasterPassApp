@@ -10,79 +10,65 @@ struct PasswordListView: View {
     @State private var currentIndexToUnlock: Int? = nil
     @State private var selectedPassword: PasswordEntry? = nil
 
-
-
     var body: some View {
-        VStack {
-            Text("Saved Passwords")
-                .font(.largeTitle)
-                .padding()
+        NavigationView {
+            VStack {
+                Text("Saved Passwords")
+                    .font(.largeTitle)
+                    .padding()
 
-            List {
-                ForEach(savedPasswords.indices, id: \.self) { index in
-                    let entry = savedPasswords[index]
+                List {
+                    ForEach(savedPasswords.indices, id: \.self) { index in
+                        let entry = savedPasswords[index]
 
-                    VStack(alignment: .leading) {
-                        Text(entry.serviceName)
-                            .font(.headline)
+                        VStack(alignment: .leading) {
+                            Text(entry.serviceName)
+                                .font(.headline)
 
-                        Text("Website: \(entry.website)")
-                        Text("Username: \(entry.username)")
-                        Text("Email: \(entry.email)")
+                            Text("Website: \(entry.website)")
+                            Text("Username: \(entry.username)")
+                            Text("Email: \(entry.email)")
 
-                        if entry.passwordHidden {
-                            Text("Password: ********")
-                                .foregroundColor(.gray)
-                                .onTapGesture {
-                                    authenticateToTogglePassword(for: index)
-                                }
-                        } else {
-                            Text("Password: \(entry.password)")
-                                .foregroundColor(.gray)
+                            if entry.passwordHidden {
+                                Text("Password: ********")
+                                    .foregroundColor(.gray)
+                                    .onTapGesture {
+                                        authenticateToTogglePassword(for: index)
+                                    }
+                            } else {
+                                Text("Password: \(entry.password)")
+                                    .foregroundColor(.gray)
+                            }
+
+                            Button(action: {
+                                showPasswordDetails(for: entry)
+                            }) {
+                                Text("View Details")
+                                    .font(.subheadline)
+                                    .foregroundColor(.blue)
+                            }
+                            .padding(.top, 5)
                         }
-
-                        // View Details Button
-                        Button(action: {
-                            showPasswordDetails(for: entry)
-                        }) {
-                            Text("View Details")
-                                .font(.subheadline)
-                                .foregroundColor(.blue)
-                        }
-                        .padding(.top, 5)
                     }
+                    .onDelete(perform: deletePassword)
                 }
-                .onDelete(perform: deletePassword)
             }
-        }
-        .sheet(item: $selectedPassword) { selectedPassword in
-            PasswordDetailView(
-                password: Binding(
-                    get: { selectedPassword },
-                    set: { updatedPassword in
-                        if let index = savedPasswords.firstIndex(where: { $0.id == updatedPassword.id }) {
-                            savedPasswords[index] = updatedPassword
-                            PasswordManager.savePasswords(savedPasswords, for: loggedInUsername) //
+            .sheet(item: $selectedPassword) { password in
+                PasswordDetailView(
+                    password: Binding(
+                        get: { password },
+                        set: { updatedPassword in
+                            if let index = savedPasswords.firstIndex(where: { $0.id == updatedPassword.id }) {
+                                savedPasswords[index] = updatedPassword
+                                PasswordManager.savePasswords(savedPasswords, for: loggedInUsername)
+                            }
                         }
+                    ),
+                    onClose: {
+                        selectedPassword = nil
                     }
-                ),
-                onClose: {
-                    self.selectedPassword = nil // Ensure this is properly mutable
-                }
-            )
-        }
-
-        .sheet(isPresented: $showPasscodePrompt) {
-            PasscodePromptView(
-                enteredPasscode: $enteredPasscode,
-                onUnlock: {
-                    if let index = currentIndexToUnlock {
-                        togglePasswordVisibility(for: index)
-                        cancelPasscodeEntry()
-                    }
-                },
-                onCancel: cancelPasscodeEntry
-            )
+                )
+            }
         }
     }
 

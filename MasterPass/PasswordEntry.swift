@@ -1,5 +1,3 @@
-// PasswordEntry.swift
-// Represents a password entry with details like service name, website, username, and password.
 import Foundation
 
 struct PasswordEntry: Identifiable, Codable {
@@ -9,14 +7,23 @@ struct PasswordEntry: Identifiable, Codable {
     let username: String
     let email: String
     var password: String
-    var passwordHidden: Bool = true
+    var passwordHidden: Bool
 
-    init(serviceName: String, website: String, username: String, email: String, password: String) {
-        self.id = UUID()
+    init(
+        id: UUID = UUID(),
+        serviceName: String,
+        website: String,
+        username: String,
+        email: String,
+        password: String,
+        passwordHidden: Bool = true
+    ) {
+        self.id = id
         self.serviceName = serviceName
         self.website = website
         self.username = username
         self.email = email
         self.password = password
+        self.passwordHidden = passwordHidden
     }
 }
