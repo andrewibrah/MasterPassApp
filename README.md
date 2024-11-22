@@ -21,27 +21,17 @@ MasterPass is ideal for users who prioritize simplicity, security, and functiona
   - **Email**
 - Passwords are hidden by default for enhanced security.
 
-### **2. Biometric & Passcode Authentication**
-- Authenticate securely using **Face ID** or **Touch ID** to reveal hidden passwords.
-- Backup security with a **4-digit passcode**.
-- Auto-hide passwords after a user-specified duration (10 seconds, 30 seconds, 1 minute, or 5 minutes).
-
-### **3. Intelligent Password Generator**
+### **2. Intelligent Password Generator**
 - Generate secure and random passwords of customizable lengths.
 - Conveniently use generated passwords for creating new entries.
 
-### **4. Passcode Management**
-- Set or update a **4-digit passcode** to safeguard the app.
-- Create a backup passcode immediately after account registration.
-- Change passcodes by verifying the existing one for added security.
-
-### **5. Account System**
+### **3. Account System**
 - Sign up and log in with a username and password.
 - Automatically save MasterPass account credentials in the saved passwords.
 - Securely log out while preserving account privacy.
 - Designated **admin user** capability for enhanced app management.
 
-### **6. Customizable User Experience**
+### **4. Customizable User Experience**
 - A visually appealing interface with a **red theme** and a vibrant, colorful **MasterPass logo**.
 - Three main actions available from the home screen:
   - **Create Password**
